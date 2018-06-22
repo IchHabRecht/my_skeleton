@@ -1,0 +1,38 @@
+{
+    "name": "ichhabrecht/my-skeleton",
+    "description": "Extension skeleton for TYPO3 >= 7.6",
+    "type": "typo3-cms-extension",
+    "keywords": [
+        "TYPO3 CMS",
+        "Extension",
+        "Skeleton"
+    ],
+    "homepage": "https://github.com/IchHabRecht/my_skeleton",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Nicole Cordes",
+            "email": "typo3@cordes.co",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "typo3/cms-core": "^7.6 || ^8.7 || >=9.0 <9.4"
+    },
+    "replace": {
+        "my_skeleton": "self.version",
+        "typo3-ter/my-skeleton": "self.version"
+    },
+    "config": {
+        "vendor-dir": ".Build/vendor",
+        "bin-dir": ".Build/bin"
+    },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "my_skeleton",
+            "cms-package-dir": "{$vendor-dir}/typo3/cms",
+            "app-dir": ".Build",
+            "web-dir": ".Build/public"
+        }
+    }
+}
