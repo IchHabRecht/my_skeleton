@@ -22,8 +22,33 @@ install:
       composer require typo3/cms-core="@dev" --no-update;
     fi
   - composer require nimut/typo3-complete:$TYPO3
+  - mkdir -p .Build/public/typo3conf/ext/
+  - if [ ! -L .Build/public/typo3conf/ext/my_skeleton ]; then ln -snvf ../../../../. .Build/public/typo3conf/ext/my_skeleton; fi
+  - export TYPO3_PATH_ROOT=$PWD/.Build/public
+  - export typo3DatabaseName=typo3
+  - export typo3DatabaseHost=localhost
+  - export typo3DatabaseUsername=root
+  - export typo3DatabasePassword=
 
 script:
+  - >
+    if [ -d "Tests/Unit" ]; then
+      echo;
+      echo "Running unit tests";
+      echo;
+      echo;
+      .Build/bin/phpunit -c .Build/vendor/nimut/testing-framework/res/Configuration/UnitTests.xml Tests/Unit/;
+    fi
+
+  - >
+    if [ -d "Tests/Functional" ]; then
+      echo;
+      echo "Running functional tests";
+      echo;
+      echo;
+      find 'Tests/Functional' -wholename '*Test.php' | parallel --gnu 'echo; echo "Running functional test suite {}"; .Build/bin/phpunit -c .Build/vendor/nimut/testing-framework/res/Configuration/FunctionalTests.xml {}';
+    fi
+
   - >
     echo;
     echo "Running php lint";
