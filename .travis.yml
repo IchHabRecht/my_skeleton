@@ -77,3 +77,30 @@ jobs:
     - stage: test
       php: 5.5
       env: TYPO3=^7.6
+
+    - stage: 🚢 to ter
+      if: tag IS present AND env(TYPO3_ORG_USERNAME) IS present AND env(TYPO3_ORG_PASSWORD) IS present
+      php: 7.0
+      env: TYPO3=^8.7
+      before_install: skip
+      install: skip
+      before_script: skip
+      script:
+      - >
+        echo;
+        echo "Preparing upload of release ${TRAVIS_TAG} to TER";
+        echo;
+        echo;
+        composer require --dev nimut/typo3-complete:$TYPO3;
+        composer require --update-no-dev helhum/ter-client:dev-master;
+
+        # Cleanup before we upload
+        git reset --hard HEAD && git clean -fx;
+
+        # Upload
+        TAG_MESSAGE=`git tag -n10 -l $TRAVIS_TAG | sed 's/^[0-9.]*[ ]*//g'`;
+        echo;
+        echo "Uploading release ${TRAVIS_TAG} to TER";
+        echo;
+        echo;
+        .Build/bin/ter-client upload my_skeleton . -u "$TYPO3_ORG_USERNAME" -p "$TYPO3_ORG_PASSWORD" -m "$TAG_MESSAGE";
