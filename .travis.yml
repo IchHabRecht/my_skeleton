@@ -46,7 +46,7 @@ script:
       echo "Running unit tests";
       echo;
       echo;
-      .Build/bin/phpunit -c .Build/vendor/nimut/testing-framework/res/Configuration/UnitTests.xml Tests/Unit/;
+      .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/UnitTestsBootstrap.php Tests/Unit/;
     fi
 
   - >
@@ -55,7 +55,7 @@ script:
       echo "Running functional tests";
       echo;
       echo;
-      find 'Tests/Functional' -wholename '*Test.php' | parallel --gnu 'echo; echo "Running functional test suite {}"; .Build/bin/phpunit -c .Build/vendor/nimut/testing-framework/res/Configuration/FunctionalTests.xml {}';
+      find 'Tests/Functional' -wholename '*Test.php' | parallel --gnu 'echo; echo "Running functional test suite {}"; .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/FunctionalTestsBootstrap.php {}';
     fi
 
   - >
@@ -119,7 +119,7 @@ jobs:
       php: 7.2
       before_install: skip
       install:
-        - mkdir -p .Log/coverage/ .Log/log/
+        - mkdir -p .Log/coverage/ .Log/junit/
         - export TYPO3_PATH_WEB=$PWD/.Build/public
         - export typo3DatabaseName=typo3
         - export typo3DatabaseHost=localhost
@@ -148,7 +148,7 @@ jobs:
                 echo "Running unit tests";
                 echo;
                 echo;
-                .Build/bin/phpunit -c .Build/vendor/nimut/testing-framework/res/Configuration/UnitTests.xml --log-junit .Log/log/unit_$VERSION.xml --coverage-php .Log/coverage/unit_$VERSION.cov --whitelist Classes Tests/Unit/;
+                .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/UnitTestsBootstrap.php --log-junit .Log/junit/unit_$VERSION.xml --coverage-php .Log/coverage/unit_$VERSION.cov Tests/Unit/;
               fi
 
               if [ -d "Tests/Functional" ]; then
@@ -156,7 +156,7 @@ jobs:
                 echo "Running functional tests";
                 echo;
                 echo;
-                .Build/bin/phpunit -c .Build/vendor/nimut/testing-framework/res/Configuration/FunctionalTests.xml --log-junit .Log/log/functional_$VERSION.xml --coverage-php .Log/coverage/functional_$VERSION.cov --whitelist Classes Tests/Functional/;
+                .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/FunctionalTestsBootstrap.php --log-junit .Log/junit/functional_$VERSION.xml --coverage-php .Log/coverage/functional_$VERSION.cov Tests/Functional/;
               fi
             done
 
@@ -166,7 +166,7 @@ jobs:
             echo;
             composer require --update-with-all-dependencies nimut/phpunit-merger;
             .Build/bin/phpunit-merger coverage .Log/coverage/ .Log/coverage.xml;
-            .Build/bin/phpunit-merger log .Log/log/ .Log/tests.xml;
+            .Build/bin/phpunit-merger log .Log/junit/ .Log/junit.xml;
           fi
 
         - git fetch --unshallow || true
