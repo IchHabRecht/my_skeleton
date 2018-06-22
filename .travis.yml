@@ -4,12 +4,21 @@ addons:
   apt:
     packages:
       - parallel
+  sonarcloud:
+    organization: "ichhabrecht-github"
+    branches:
+      - master
+      - pre-merge
 
 cache:
   directories:
     - $HOME/.composer/cache
+    - $HOME/.sonar/cache
 
-sudo: false
+jdk:
+  - oraclejdk8
+
+sudo: required
 
 before_install:
   - if php -i | grep -q xdebug; then phpenv config-rm xdebug.ini; fi
@@ -104,3 +113,67 @@ jobs:
         echo;
         echo;
         .Build/bin/ter-client upload my_skeleton . -u "$TYPO3_ORG_USERNAME" -p "$TYPO3_ORG_PASSWORD" -m "$TAG_MESSAGE";
+
+    - stage: ✔ with sonarqube scanner
+      if: type = push AND branch IN (master, pre-merge) AND env(SONAR_TOKEN) IS present AND fork = false
+      php: 7.2
+      before_install: skip
+      install:
+        - mkdir -p .Log/coverage/ .Log/log/
+        - export TYPO3_PATH_WEB=$PWD/.Build/public
+        - export typo3DatabaseName=typo3
+        - export typo3DatabaseHost=localhost
+        - export typo3DatabaseUsername=root
+        - export typo3DatabasePassword=
+      before_script:
+      script:
+        - >
+          if [ -d "Tests" ]; then
+            for TYPO3 in "^7.6" "^8.7" "^9.0"; do
+
+              echo;
+              echo "Running TYPO3 version $TYPO3";
+              echo;
+              echo;
+              git clean -Xdf;
+              composer require --dev nimut/typo3-complete:$TYPO3;
+              git checkout composer.json;
+              VERSION=${TYPO3//[!0-9]/};
+
+              mkdir -p .Build/public/typo3conf/ext/
+              if [ ! -L .Build/public/typo3conf/ext/my_skeleton ]; then ln -snvf ../../../../. .Build/public/typo3conf/ext/my_skeleton; fi
+
+              if [ -d "Tests/Unit" ]; then
+                echo;
+                echo "Running unit tests";
+                echo;
+                echo;
+                .Build/bin/phpunit -c .Build/vendor/nimut/testing-framework/res/Configuration/UnitTests.xml --log-junit .Log/log/unit_$VERSION.xml --coverage-php .Log/coverage/unit_$VERSION.cov --whitelist Classes Tests/Unit/;
+              fi
+
+              if [ -d "Tests/Functional" ]; then
+                echo;
+                echo "Running functional tests";
+                echo;
+                echo;
+                .Build/bin/phpunit -c .Build/vendor/nimut/testing-framework/res/Configuration/FunctionalTests.xml --log-junit .Log/log/functional_$VERSION.xml --coverage-php .Log/coverage/functional_$VERSION.cov --whitelist Classes Tests/Functional/;
+              fi
+            done
+
+            echo;
+            echo "Merging log and coverage files";
+            echo;
+            echo;
+            composer require --update-with-all-dependencies nimut/phpunit-merger;
+            .Build/bin/phpunit-merger coverage .Log/coverage/ .Log/coverage.xml;
+            .Build/bin/phpunit-merger log .Log/log/ .Log/tests.xml;
+          fi
+
+        - git fetch --unshallow || true
+
+        - >
+          echo;
+          echo "Running SonarQube Scanner";
+          echo;
+          echo;
+          sonar-scanner;
