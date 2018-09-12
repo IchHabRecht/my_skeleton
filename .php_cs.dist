@@ -102,4 +102,6 @@ return PhpCsFixer\Config::create()
             ->exclude('doc')
             ->exclude('Resources')
             ->notName('ext_emconf.php')
+            ->notName('ext_localconf.php')
+            ->notName('ext_tables.php')
     );
