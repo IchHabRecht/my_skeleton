@@ -24,7 +24,6 @@
         "nimut/testing-framework": "2.x-dev || 4.x-dev"
     },
     "replace": {
-        "my_skeleton": "self.version",
         "typo3-ter/my-skeleton": "self.version"
     },
     "config": {
