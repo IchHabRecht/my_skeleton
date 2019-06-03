@@ -5,3 +5,15 @@
 [![StyleCI](https://styleci.io/repos/138314722/shield?branch=master)](https://styleci.io/repos/138314722)
 
 Extension skeleton for TYPO3 >= 7.6
+
+## Features
+
+## Installation
+
+Simply install the extension with Composer or the [Extension Manager](https://extensions.typo3.org/extension/my_skeleton/).
+
+`composer require ichhabrecht/my-skeleton`
+
+## Usage
+
+## Community
