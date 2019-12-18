@@ -18,10 +18,10 @@
     ],
     "require": {
         "php": ">= 5.5, < 7.5",
-        "typo3/cms-core": "^8.7 || ^9.5"
+        "typo3/cms-core": "^8.7 || ^9.5 || ~10.2.0"
     },
     "require-dev": {
-        "nimut/testing-framework": "4.x-dev"
+        "nimut/testing-framework": "5.x-dev"
     },
     "replace": {
         "typo3-ter/my-skeleton": "self.version"
