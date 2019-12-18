@@ -12,7 +12,7 @@
 
 $EM_CONF[$_EXTKEY] = array (
   'title' => 'My Skeleton',
-  'description' => 'Extension skeleton for TYPO3 >= 7.6',
+  'description' => 'Extension skeleton for TYPO3 >= 8.7',
   'category' => 'misc',
   'author' => 'Nicole Cordes',
   'author_email' => 'typo3@cordes.co',
@@ -22,16 +22,16 @@ $EM_CONF[$_EXTKEY] = array (
   'createDirs' => '',
   'clearCacheOnLoad' => 0,
   'version' => '0.1.0',
-  'constraints' => 
+  'constraints' =>
   array (
-    'depends' => 
+    'depends' =>
     array (
-      'typo3' => '7.6.0-9.5.99',
+      'typo3' => '8.7.0-9.5.99',
     ),
-    'conflicts' => 
+    'conflicts' =>
     array (
     ),
-    'suggests' => 
+    'suggests' =>
     array (
     ),
   ),

@@ -1,6 +1,6 @@
 {
     "name": "ichhabrecht/my-skeleton",
-    "description": "Extension skeleton for TYPO3 >= 7.6",
+    "description": "Extension skeleton for TYPO3 >= 8.7",
     "type": "typo3-cms-extension",
     "keywords": [
         "TYPO3 CMS",
@@ -18,10 +18,10 @@
     ],
     "require": {
         "php": ">= 5.5, < 7.4",
-        "typo3/cms-core": "^7.6 || ^8.7 || ^9.5"
+        "typo3/cms-core": "^8.7 || ^9.5"
     },
     "require-dev": {
-        "nimut/testing-framework": "2.x-dev || 4.x-dev"
+        "nimut/testing-framework": "4.x-dev"
     },
     "replace": {
         "typo3-ter/my-skeleton": "self.version"

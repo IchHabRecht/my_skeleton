@@ -4,7 +4,7 @@
 [![Build Status](https://img.shields.io/travis/IchHabRecht/my_skeleton/master.svg)](https://travis-ci.org/IchHabRecht/my_skeleton)
 [![StyleCI](https://styleci.io/repos/138314722/shield?branch=master)](https://styleci.io/repos/138314722)
 
-Extension skeleton for TYPO3 >= 7.6
+Extension skeleton for TYPO3 >= 8.7
 
 ## Features
 
