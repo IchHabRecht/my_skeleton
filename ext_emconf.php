@@ -12,7 +12,7 @@
 
 $EM_CONF[$_EXTKEY] = array (
   'title' => 'My Skeleton',
-  'description' => 'Extension skeleton for TYPO3 >= 8.7',
+  'description' => 'Extension skeleton for TYPO3 >= 9.5',
   'category' => 'misc',
   'author' => 'Nicole Cordes',
   'author_email' => 'typo3@cordes.co',
@@ -26,7 +26,7 @@ $EM_CONF[$_EXTKEY] = array (
   array (
     'depends' =>
     array (
-      'typo3' => '8.7.0-10.4.99',
+      'typo3' => '9.5.0-10.4.99',
     ),
     'conflicts' =>
     array (
