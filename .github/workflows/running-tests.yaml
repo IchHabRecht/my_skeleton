@@ -49,4 +49,4 @@ jobs:
                 run: |
                     mkdir -p .Build/public/typo3conf/ext/
                     if [ ! -L .Build/public/typo3conf/ext/my_skeleton ]; then ln -snvf ../../../../. .Build/public/typo3conf/ext/my_skeleton; fi
-                    echo "Hello $typo3DatabaseUsername on $typo3DatabaseName!"
+                    echo "Hello $typo3DatabaseUsername on $typo3DatabaseHost $typo3DatabaseName $typo3DatabasePassword $typo3DatabasePort !"
