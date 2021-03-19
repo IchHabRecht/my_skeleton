@@ -26,8 +26,8 @@ jobs:
                 image: mysql:5.7
                 env:
                     MYSQL_ALLOW_EMPTY_PASSWORD: false
-                    MYSQL_DATABASE: typo3
-                    MYSQL_ROOT_PASSWORD: password
+                    MYSQL_DATABASE: ${{ env.typo3DatabaseName }}
+                    MYSQL_ROOT_PASSWORD: ${{ env.typo3DatabasePassword }}
                 ports:
                     - 3306
         strategy:
