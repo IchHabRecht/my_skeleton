@@ -11,6 +11,13 @@ on:
     schedule:
         -   cron: '*/42 4 * * *'
 
+
+env:
+    typo3DatabaseHost: localhost
+    typo3DatabaseName: typo3
+    typo3DatabaseUsername: root
+    typo3DatabasePassword: password
+
 jobs:
     running-tests:
         runs-on: ubuntu-latest
@@ -40,12 +47,6 @@ jobs:
                     composer update
                     git checkout composer.json
             -   name: prepare
-                env:
-                    typo3DatabaseHost: localhost
-                    typo3DatabaseName: ${{ job.services.mysql.env.MYSQL_DATABASE }}
-                    typo3DatabaseUsername: root
-                    typo3DatabasePassword: ${{ job.services.mysql.env.MYSQL_ROOT_PASSWORD }}
-                    typo3DatabasePort: ${{ job.services.mysql.ports[3306] }}
                 run: |
                     mkdir -p .Build/public/typo3conf/ext/
                     if [ ! -L .Build/public/typo3conf/ext/my_skeleton ]; then ln -snvf ../../../../. .Build/public/typo3conf/ext/my_skeleton; fi
