@@ -13,13 +13,14 @@ on:
 
 
 env:
+    extensionKey: my_skeleton
     typo3DatabaseHost: localhost
     typo3DatabaseName: typo3
     typo3DatabaseUsername: root
     typo3DatabasePassword: password
 
 jobs:
-    running-tests:
+    running-stable-tests:
         runs-on: ubuntu-latest
         services:
             mysql:
@@ -49,5 +50,17 @@ jobs:
             -   name: prepare
                 run: |
                     mkdir -p .Build/public/typo3conf/ext/
-                    if [ ! -L .Build/public/typo3conf/ext/my_skeleton ]; then ln -snvf ../../../../. .Build/public/typo3conf/ext/my_skeleton; fi
-                    echo "Hello $typo3DatabaseUsername on $typo3DatabaseHost $typo3DatabaseName $typo3DatabasePassword $typo3DatabasePort !"
+                    if [ ! -L .Build/public/typo3conf/ext/${{ env.extensionKey }} ]; then ln -snvf ../../../../. .Build/public/typo3conf/ext/${{ env.extensionKey }}; fi
+            -   name: unit tests
+                run: |
+                    if [ -d "Tests/Unit" ]; then
+                        .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/UnitTestsBootstrap.php --testsuite unit;
+                    fi
+            -   name: functional tests
+                run: |
+                    if [ -d "Tests/Functional" ]; then
+                        find 'Tests/Functional' -wholename '*Test.php' | parallel --gnu 'echo; echo "Running functional test suite {}"; .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/FunctionalTestsBootstrap.php {}';
+                    fi
+            -   name: php lint
+                run: |
+                    find . -name \*.php ! -path "./.Build/*" | parallel --gnu php -d display_errors=stderr -l {} > /dev/null \;;
