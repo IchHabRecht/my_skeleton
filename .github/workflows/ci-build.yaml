@@ -1,4 +1,4 @@
-name: 🏃 tests
+name: CI Build
 
 on:
     push:
@@ -21,6 +21,7 @@ env:
 
 jobs:
     running-stable-tests:
+        name: 🏃 stable tests
         runs-on: ubuntu-latest
         services:
             mysql:
@@ -42,25 +43,35 @@ jobs:
                 with:
                     php-version: ${{ matrix.php }}
                     tools: composer:v2
-            -   name: install
+            -   name: Composer cache
+                id: composer-cache
+                run: |
+                    echo "::set-output name=dir::$(composer config cache-files-dir)"
+            -   uses: actions/cache@v2
+                with:
+                    path: ${{ steps.composer-cache.outputs.dir }}
+                    key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+                    restore-keys: |
+                        ${{ runner.os }}-composer-
+            -   name: Install
                 run: |
                     composer require --no-progress --no-suggest --no-update nimut/typo3-complete:"${{ matrix.typo3 }}"
                     composer update
                     git checkout composer.json
-            -   name: prepare
+            -   name: Prepare
                 run: |
                     mkdir -p .Build/public/typo3conf/ext/
                     if [ ! -L .Build/public/typo3conf/ext/${{ env.extensionKey }} ]; then ln -snvf ../../../../. .Build/public/typo3conf/ext/${{ env.extensionKey }}; fi
-            -   name: unit tests
+            -   name: Unit tests
                 run: |
                     if [ -d "Tests/Unit" ]; then
                         .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/UnitTestsBootstrap.php --testsuite unit;
                     fi
-            -   name: functional tests
+            -   name: Functional tests
                 run: |
                     if [ -d "Tests/Functional" ]; then
                         find 'Tests/Functional' -wholename '*Test.php' | parallel --gnu 'echo; echo "Running functional test suite {}"; .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/FunctionalTestsBootstrap.php {}';
                     fi
-            -   name: php lint
+            -   name: PHP lint
                 run: |
                     find . -name \*.php ! -path "./.Build/*" | parallel --gnu php -d display_errors=stderr -l {} > /dev/null \;;
