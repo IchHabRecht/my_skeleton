@@ -196,7 +196,7 @@ jobs:
                         ${{ runner.os }}-composer-
             -   name: Install
                 run: |
-                    composer require --no-progress --no-suggest --no-update --prefer-lowest nimut/typo3-complete:"$TYPO3"
+                    composer require --no-progress --no-suggest --no-update --prefer-lowest nimut/typo3-complete:"${{ matrix.typo3 }}"
                     composer update
                     git checkout composer.json
             -   name: Prepare
