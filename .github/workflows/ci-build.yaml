@@ -14,7 +14,7 @@ on:
 
 env:
     extensionKey: my_skeleton
-    typo3DatabaseHost: localhost
+    typo3DatabaseHost: 127.0.0.1
     typo3DatabaseName: typo3
     typo3DatabaseUsername: root
     typo3DatabasePassword: password
@@ -22,6 +22,11 @@ env:
 jobs:
     running-stable-tests:
         name: 🏃 stable tests
+        strategy:
+            fail-fast: false
+            matrix:
+                php: [ '7.4', '7.3', '7.2' ]
+                typo3: [ '^10.4', '^9.5' ]
         runs-on: ubuntu-latest
         services:
             mysql:
@@ -32,12 +37,10 @@ jobs:
                     MYSQL_ROOT_PASSWORD: ${{ env.typo3DatabasePassword }}
                 ports:
                     - 3306
-        strategy:
-            fail-fast: false
-            matrix:
-                php: [ '7.4', '7.3', '7.2' ]
-                typo3: [ '^10.4', '^9.5' ]
         steps:
+            -   name: Expose mysql port
+                run: |
+                    echo "typo3DatabasePort=${{ job.services.mysql.ports[3306] }}" >> $GITHUB_ENV
             -   uses: actions/checkout@v2
             -   uses: shivammathur/setup-php@v2
                 with:
@@ -50,11 +53,80 @@ jobs:
             -   uses: actions/cache@v2
                 with:
                     path: ${{ steps.composer-cache.outputs.dir }}
-                    key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+                    key: ${{ runner.os }}-composer-${{ hashFiles('composer.json') }}
                     restore-keys: |
                         ${{ runner.os }}-composer-
             -   name: Install
                 run: |
+                    composer require --no-progress --no-suggest --no-update nimut/typo3-complete:"${{ matrix.typo3 }}"
+                    composer update
+                    git checkout composer.json
+            -   name: Prepare
+                run: |
+                    mkdir -p .Build/public/typo3conf/ext/
+                    if [ ! -L .Build/public/typo3conf/ext/${{ env.extensionKey }} ]; then ln -snvf ../../../../. .Build/public/typo3conf/ext/${{ env.extensionKey }}; fi
+            -   name: Unit tests
+                run: |
+                    if [ -d "Tests/Unit" ]; then
+                        .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/UnitTestsBootstrap.php --testsuite unit;
+                    fi
+            -   name: Functional tests
+                run: |
+                    if [ -d "Tests/Functional" ]; then
+                        find 'Tests/Functional' -wholename '*Test.php' | parallel --gnu 'echo; echo "Running functional test suite {}"; .Build/bin/phpunit --bootstrap .Build/vendor/nimut/testing-framework/res/Configuration/FunctionalTestsBootstrap.php {}';
+                    fi
+            -   name: PHP lint
+                run: |
+                    find . -name \*.php ! -path "./.Build/*" | parallel --gnu php -d display_errors=stderr -l {} > /dev/null \;;
+
+    running-dev-tests:
+        name: 🏃 dev tests
+        needs: running-stable-tests
+        continue-on-error: ${{ matrix.experimental }}
+        strategy:
+            fail-fast: false
+            matrix:
+                php: [ '7.4', '7.3', '7.2' ]
+                typo3: [ '10.4.x-dev', '9.5.x-dev' ]
+                experimental: [ false ]
+                include:
+                    -   php: '7.4'
+                        typo3: 'dev-master'
+                        experimental: true
+        runs-on: ubuntu-latest
+        services:
+            mysql:
+                image: mysql:5.7
+                env:
+                    MYSQL_ALLOW_EMPTY_PASSWORD: false
+                    MYSQL_DATABASE: ${{ env.typo3DatabaseName }}
+                    MYSQL_ROOT_PASSWORD: ${{ env.typo3DatabasePassword }}
+                ports:
+                    - 3306
+        steps:
+            -   name: Expose mysql port
+                run: |
+                    echo "typo3DatabasePort=${{ job.services.mysql.ports[3306] }}" >> $GITHUB_ENV
+            -   uses: actions/checkout@v2
+            -   uses: shivammathur/setup-php@v2
+                with:
+                    php-version: ${{ matrix.php }}
+                    tools: composer:v2
+            -   name: Composer cache
+                id: composer-cache
+                run: |
+                    echo "::set-output name=dir::$(composer config cache-files-dir)"
+            -   uses: actions/cache@v2
+                with:
+                    path: ${{ steps.composer-cache.outputs.dir }}
+                    key: ${{ runner.os }}-composer-${{ hashFiles('composer.json') }}
+                    restore-keys: |
+                        ${{ runner.os }}-composer-
+            -   name: Install
+                run: |
+                    composer config minimum-stability dev
+                    composer config prefer-stable true
+                    composer require --no-progress --no-suggest --no-update typo3/cms-core:"@dev"
                     composer require --no-progress --no-suggest --no-update nimut/typo3-complete:"${{ matrix.typo3 }}"
                     composer update
                     git checkout composer.json
