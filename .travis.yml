@@ -135,6 +135,8 @@ jobs:
             env: TYPO3="^8.7 ^9.5 ^10.4"
             before_install:
                 - composer self-update --1
+                - nvm install 12
+                - nvm use 12
             before_script:
                 - mkdir -p .Log/coverage/ .Log/junit/
                 - export TYPO3_PATH_WEB=$PWD/.Build/public
