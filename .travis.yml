@@ -108,8 +108,10 @@ jobs:
 
         -   stage: 🚢 to ter
             if: tag IS present AND env(TYPO3_ORG_USERNAME) IS present AND env(TYPO3_ORG_PASSWORD) IS present
-            php: 7.0
+            php: 7.4
             before_install:
+                - sudo sed 's/mozilla.DST_Root_CA_X3.crt/!mozilla\/DST_Root_CA_X3.crt/' -i /etc/ca-certificates.conf
+                - sudo update-ca-certificates
                 - composer self-update --1
             script:
                 - >
