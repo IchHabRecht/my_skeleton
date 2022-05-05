@@ -252,6 +252,12 @@ jobs:
             env: TYPO3=11.5.x-dev
         -   <<: *lowest-tests
             php: 7.4
+            env: TYPO3=^11.5
+        -   <<: *lowest-tests
+            php: 7.4
+            env: TYPO3=11.5.x-dev
+        -   <<: *lowest-tests
+            php: 7.4
             env: TYPO3=^10.4
         -   <<: *lowest-tests
             php: 7.4
